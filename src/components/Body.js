@@ -1,18 +1,18 @@
 import axios from "axios";
-import RestaurantCard from "./RestaurantCard";
 import { useEffect, useState } from "react";
+import RestaurantCard from "./RestaurantCard";
 import Shimmer from "./Shimmer";
 
 const Body = () => {
   const [listOfRestaurant, setListOfRestaurant] = useState([]);
 
-  const [filteredList, setFilteredList] = useState([]);
+  const [searchRestaurant, setSearchRestaurant] = useState("");
 
-  const [searchBox, setSearchBox] = useState("");
+  const [filteredRestaurants, setFilteredRestaurants] = useState([]);
 
   useEffect(() => {
     fetchData();
-  }, []); // ye API se Data fetch kr lega fetchData ko call krke, body render hogi fir API call or uske wapis re-render body
+  }, []);
 
   const fetchData = async () => {
     const response = await axios.get(
@@ -20,38 +20,39 @@ const Body = () => {
     );
     const json = await response.data;
     console.log(
-      // check the data format is write or not because API is up to data and formate is changed
       json?.data?.cards[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants
     );
     setListOfRestaurant(
       json?.data?.cards[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants
     );
-    setFilteredList(
+    setFilteredRestaurants(
       json?.data?.cards[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants
     );
   };
 
-  return listOfRestaurant.length == 0 ? (
+  return filteredRestaurants.length == 0 ? (
     <Shimmer />
   ) : (
     <div className="body">
-      <div className="filter-container">
+      <div className="filter">
         <div className="search">
           <input
+            placeholder=" Search Your Test"
             type="text"
             className="search-box"
-            value={searchBox}
-            onChange={(e) => setSearchBox(e.target.value)}
+            value={searchRestaurant}
+            onChange={(e) => {
+              setSearchRestaurant(e.target.value);
+            }}
           />
           <button
             onClick={() => {
-              let filteredBox = listOfRestaurant.filter((res) =>
-                res.info.name.toLowerCase().includes(searchBox.toLowerCase())
+              let filteredRes = listOfRestaurant.filter((res) =>
+                res.info.name
+                  .toLowerCase()
+                  .includes(searchRestaurant.toLowerCase())
               );
-              // includes:-  Yeh check karta hai ki "dom" string "domino's pizza" ke andar exist karti hai ya nahi.
-              // "domino's pizza".includes("dom") = true and store in res
-              // console.log(filteredBox);
-              setFilteredList(filteredBox);
+              setFilteredRestaurants(filteredRes);
             }}>
             Search
           </button>
@@ -59,28 +60,21 @@ const Body = () => {
         <button
           className="filter-btn"
           onClick={() => {
-            let filteredRestaurant = listOfRestaurant.filter(
-              (restaurant) => restaurant.info.avgRating > 4.5
+            let filteredRes = listOfRestaurant.filter(
+              (res) => res.info.avgRating >= 4.5
             );
-
-            setFilteredList(filteredRestaurant);
+            setFilteredRestaurants(filteredRes);
           }}>
-          Top rated restaurant
+          Top rated Restaurant
         </button>
       </div>
+
       <div className="res-container">
-        {filteredList?.map((restaurant) => (
-          // breakets ka dhyan rakhna () = isme return krna nahi pdta
-          // Par aapko yaad rakhna hai ki agar curly braces ({}) use karte ho, toh return lagana padega.
+        {filteredRestaurants?.map((restaurant) => (
           <RestaurantCard key={restaurant.info.id} resData={restaurant} />
         ))}
       </div>
     </div>
   );
-}; // ye
-
+};
 export default Body;
-
-// .toLowerCase() → Case-insensitive search ke liye.
-// .includes() → Check karta hai ki substring exist karti hai ya nahi.
-// filter() → Sirf matching results ko return karta hai.

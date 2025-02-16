@@ -1,8 +1,7 @@
+import React from "react";
+
 const Contact = () => {
-  return (
-    <div>
-      <h1>this is contact page</h1>
-    </div>
-  );
+  return <div>this is Contact page of namaste React</div>;
 };
+
 export default Contact;
